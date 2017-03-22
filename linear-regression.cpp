@@ -36,7 +36,7 @@ int main() {
     vector<Data> trainData;
 	loadDataSet();
     //
-
+    hello();
 }
     void loadDataSet(vector<Data>& ds, string dataFile = "./save_train.txt"){
         ifstream fin(dataFile.c_str());
