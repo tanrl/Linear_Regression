@@ -3,11 +3,16 @@
 #include <vector>
 #include <sstream>
 #include <cmath>
+#include <cstdlib>
+
+#define SAMPLE "./sample_submission.csv"
+#define TRAIN "./save_train.csv"
+#define TEST "./save_test.csv"
 
 using namespace std;
 
-struct Data{
-    int features[384];
+ struct Data {
+    vector<float> features;
     int id;
 };
 // struct Param{
@@ -28,40 +33,42 @@ struct Data{
 //         Param pt(pw, 0.0);
 //         param = pt;
 //     };
-void loadDataSet(vector<Data>& ds, string dataFile);
+void loadDataSet(vector<Data> & ds,const char * dataFile);
 int main() {
+    string line;
 	//load the data and initial
 	//will get the two-dimension array for the training set and one array for ref
 	//two-dimension array for test
     vector<Data> trainData;
-	loadDataSet();
-    //
-
+	loadDataSet(trainData, TRAIN);
+    return 0;
 }
-    void loadDataSet(vector<Data>& ds, string dataFile = "./save_train.txt"){
-        ifstream fin(dataFile.c_str());
-        if (!fin){
-            cout << "文件打开失败" << endl;
-            exit(0);
-        }
-        while (fin){
-            string line;
-            getline(fin, line);
-            if (line.size()>3){
-                stringstream sin(line);
-                int t;
-                sin >> t;
-                vector<int> fea;
-                while (sin){
-                    char c = sin.peek();
-                    if (int(c) != -1){
-                        sin >> t;
-                        fea.push_back(t);
-                    }
-                }
-                int cl = fea.back();
-                fea.pop_back();
-                ds.push_back(Data(fea, cl));
-            }
-        }
+void loadDataSet(vector<Data> & ds,const char * dataFile) {
+    int id;
+    vector<float> fea;
+    float temp;
+    Data d;
+    string line;
+    ifstream fin(dataFile);
+    if (!fin){
+        cout << "文件打开失败" << endl;
+        exit(0);
     }
+    getline(fin, line);
+    getline(fin, line);
+    while (!fin.eof()){
+        stringstream sin(line);
+        sin >> id;
+        while (sin){
+            sin >> temp;
+            fea.push_back(temp);
+        }
+        d.features = fea;
+        d.id = id;
+        ds.push_back(d);
+        sin.str("");
+        sin.clear();
+        getline(fin, line);
+    }
+    fin.close();
+}
