@@ -40,8 +40,14 @@ int main() {
 	//will get the two-dimension array for the training set and one array for ref
 	//two-dimension array for test
     vector<Data> trainData;
+<<<<<<< HEAD
 	loadDataSet(trainData, TRAIN);
     return 0;
+=======
+	loadDataSet();
+    //
+    hello();
+>>>>>>> cbd0b9d0f754328158d35282c0df9e9463342f51
 }
 void loadDataSet(vector<Data> & ds,const char * dataFile) {
     int id;
