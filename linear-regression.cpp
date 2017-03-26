@@ -4,51 +4,85 @@
 #include <sstream>
 #include <cmath>
 #include <cstdlib>
-
+#include <Eigen/Dense> 
 #define SAMPLE "./sample_submission.csv"
 #define TRAIN "./save_train.csv"
 #define TEST "./save_test.csv"
 
 using namespace std;
+using namespace Eigen; 
+
 
  struct Data {
     vector<float> features;
     int id;
 };
-// struct Param{
-//     vector<double> w;
-//     double d;
-//     Param(vector<double> w1, double d1) :w(w1), d(d1){};
-//     Param() :w(vector<double>()), d(0.0){}
-// };
+void randomScale(float * s, int len) {
+    for (int i = 0; i < len; i++) {
+    	int temp = rand()%1000;
+    	float j = (float)temp/1000;
+        s[i] = j;
+    }
+}
 
-// class Logistic{
-// public:
-//     Logistic(){
-
-//         //载入traindata文件构造dataSet;
-//         loadDataSet(dataSet);
-//         //初始化Param，w的长度与数据特征的长度相同，初值为0.0。d的初值也为0.0
-//         vector<double> pw(dataSet[0].features.size(), 0.0);
-//         Param pt(pw, 0.0);
-//         param = pt;
-//     };
-void loadDataSet(vector<Data> & ds,const char * dataFile);
+void loadDataSet(vector<Data> &,const char *);
 int main() {
-    string line;
+    float _CONSTANT = 0.003;
+    float temp[384];
+    int iterTime = 10;
+    float scale[385];
+    MatrixXf Mscale(1,385);
+    randomScale(scale, 385);
 	//load the data and initial
 	//will get the two-dimension array for the training set and one array for ref
 	//two-dimension array for test
     vector<Data> trainData;
-<<<<<<< HEAD
-	loadDataSet(trainData, TRAIN);
-    return 0;
-=======
-	loadDataSet();
+    std::vector<MatrixXf> xset;
+	loadDataSet(trainData, TRAIN); 
+    int trainNum = trainData.size();
+    
+    for (int i = 0; i < trainNum; i++)
+    {
+        MatrixXf x(385,1);
+        x(0,0) = 0;
+        for (int j = 0; j < 384; j++)
+        {
+            x(j+1, 0) = trainData[i].features[j];
+        }
+        xset.push_back(x);
+    }
+    while (iterTime--)
+    {
+    	int e;
+    	cin >> e;
+        float result[trainNum];
+        //cout << trainNum << endl;
+        for (int j = 0; j < 385; j++)
+        {
+            Mscale(0, j) = scale[j];
+        }
+        
+        for (int i = 0; i < trainNum; i++)
+        {
+            MatrixXf mul = Mscale*xset[i];
+            result[i] = (float)mul(0,0)-trainData[i].features[384];
+        }
+        for (int i = 0; i < 385; i++) {
+            float add = 0;
+            for (int j = 0; j < trainNum; j++)
+            {
+                MatrixXf xtemp = xset[j];
+                if (i == 0) add += result[j];
+                else 
+                    add += result[j]*xtemp(i, 0);
+            }
+            scale[i] = scale[i] - add*_CONSTANT/trainNum;
+        }
+    }
     //
-    hello();
->>>>>>> cbd0b9d0f754328158d35282c0df9e9463342f51
+    return 0;
 }
+
 void loadDataSet(vector<Data> & ds,const char * dataFile) {
     int id;
     vector<float> fea;
@@ -63,11 +97,15 @@ void loadDataSet(vector<Data> & ds,const char * dataFile) {
     getline(fin, line);
     getline(fin, line);
     while (!fin.eof()){
+        for (int i = 0; i < line.size(); i++) {
+            if (line[i] == ',') line[i] = ' ';
+        }
         stringstream sin(line);
         sin >> id;
+        sin >> temp;
         while (sin){
-            sin >> temp;
             fea.push_back(temp);
+            sin >> temp;
         }
         d.features = fea;
         d.id = id;
@@ -75,6 +113,7 @@ void loadDataSet(vector<Data> & ds,const char * dataFile) {
         sin.str("");
         sin.clear();
         getline(fin, line);
+        fea.clear();
     }
     fin.close();
 }
